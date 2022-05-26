@@ -107,6 +107,7 @@ async def get_categories(message: types.Message):
 
 def register_admins_handlers(dp: Dispatcher):
     """Регистрация хендлеров этого файла"""
+    dp.register_message_handler(cancel_state, commands=['cancel'], state='*')
     dp.register_message_handler(get_categories, commands=['get_categories'])
     dp.register_message_handler(add_category, commands=['add_category'], state=None)
     dp.register_message_handler(add_url_to_categories, state=FSMAddCategory.get_url)
