@@ -91,7 +91,7 @@ async def get_categories(message: types.Message):
     except Exception:
         await message.answer('Не удалось получить список категорий')
     else:
-        try:
+        if url_list:
             for el in url_list:
                 to_send = []
                 for i in range(3):
@@ -101,7 +101,7 @@ async def get_categories(message: types.Message):
                 await message.answer(',\n'.join(to_send))
                 to_send.clear()
 
-        except MessageTextIsEmpty:
+        else:
             await message.answer('Cписок пуст')
 
 
