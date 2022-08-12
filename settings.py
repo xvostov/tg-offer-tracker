@@ -16,8 +16,8 @@ to_send_debug_info = os.environ.get('to_send_debug_info')
 bot_token = os.environ.get('bot_token')
 admins_list = [chat_id for chat_id in os.environ.get('admins').split(',') if chat_id]
 api_token = os.environ.get('api_token')
-olx_api_token = os.environ.get('api_token')
-olx_api_address = os.environ.get('address')
+# olx_api_token = os.environ.get('olx_api_token')
+# olx_api_address = os.environ.get('olx_api_address')
 
 
 
