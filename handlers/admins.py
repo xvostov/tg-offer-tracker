@@ -7,16 +7,47 @@ from aiogram.utils.exceptions import MessageTextIsEmpty
 
 from settings import admins_list
 from loader import dp
-import api
+from loader import db_handler
+from loguru import logger
+import asyncio
 
-
-class FSMAddCategory(StatesGroup):
+class FSMAddCategoryAvito1(StatesGroup):
     get_url = State()
 
 
-class FSMRemoveCategory(StatesGroup):
+class FSMRemoveCategoryAvito1(StatesGroup):
     get_url = State()
 
+
+class FSMAddCategoryAvito2(StatesGroup):
+    get_url = State()
+
+
+class FSMRemoveCategoryAvito2(StatesGroup):
+    get_url = State()
+
+
+class FSMAddToBlackList(StatesGroup):
+    get_id = State()
+
+
+class FSMRemoveFromBlackList(StatesGroup):
+    get_id = State()
+
+
+class FSMAddStopWord(StatesGroup):
+    word = State()
+
+
+class FSMRemoveStopWord(StatesGroup):
+    word = State()
+
+class FSMAddUser(StatesGroup):
+    get_chat_id = State()
+
+
+class FSMRemoveUser(StatesGroup):
+    get_chat_id = State()
 
 """Обработчики админских команд"""
 
@@ -45,15 +76,14 @@ async def cancel_state(message: types.Message, state: FSMContext):
 
 # Точка входа в машину состояний команды /add_category
 @check_access
-async def add_category(message: types.Message):
-    await FSMAddCategory.get_url.set()
+async def add_category_avito_1(message: types.Message):
+    await FSMAddCategoryAvito1.get_url.set()
     await message.answer('Отправьте ссылку для добавление в отслеживаемые категории, для отмены отправьте /cancel')
 
 
-async def add_url_to_categories(message: types.Message, state: FSMContext):
-
+async def add_url_to_categories_avito_1(message: types.Message, state: FSMContext):
     try:
-        api.add_category(message.text)
+        db_handler.add_category_to_avito_1(message.text)
 
     except Exception:
         await message.reply('Не удалось добавить адрес в отслеживаемые категории')
@@ -63,17 +93,53 @@ async def add_url_to_categories(message: types.Message, state: FSMContext):
     finally:
         await state.finish()
 
+# Точка входа в машину состояний команды /add_category
+@check_access
+async def add_category_avito_2(message: types.Message):
+    await FSMAddCategoryAvito2.get_url.set()
+    await message.answer('Отправьте ссылку для добавление в отслеживаемые категории, для отмены отправьте /cancel')
+
+
+async def add_url_to_categories_avito_2(message: types.Message, state: FSMContext):
+    try:
+        db_handler.add_category_to_avito_2(message.text)
+
+    except Exception:
+        await message.reply('Не удалось добавить адрес в отслеживаемые категории')
+    else:
+        await message.reply('Адрес успешно добавлен в отслеживаемые категории')
+
+    finally:
+        await state.finish()
 
 # Точка входа в машину состояний команды /remove_category
 @check_access
-async def remove_category(message: types.Message):
-    await FSMRemoveCategory.get_url.set()
+async def remove_category_avito_1(message: types.Message):
+    await FSMRemoveCategoryAvito1.get_url.set()
     await message.answer('Отправьте ссылку для удаления из отслеживаемых категорий, для отмены отправьте /cancel')
 
 
-async def remove_url_from_categories(message: types.Message, state: FSMContext):
+async def remove_url_from_categories_avito_1(message: types.Message, state: FSMContext):
     try:
-        api.remove_category(message.text)
+        db_handler.remove_category_from_avito_1(message.text)
+    except Exception:
+        await message.reply('Не удалось удалить адрес из отслеживаемых')
+    else:
+        await message.reply('Адрес успешно удален из отслеживаемых категорий')
+
+    finally:
+        await state.finish()
+
+# Точка входа в машину состояний команды /remove_category
+@check_access
+async def remove_category_avito_2(message: types.Message):
+    await FSMRemoveCategoryAvito2.get_url.set()
+    await message.answer('Отправьте ссылку для удаления из отслеживаемых категорий, для отмены отправьте /cancel')
+
+
+async def remove_url_from_categories_avito_2(message: types.Message, state: FSMContext):
+    try:
+        db_handler.remove_category_from_avito_2(message.text)
     except Exception:
         await message.reply('Не удалось удалить адрес из отслеживаемых')
     else:
@@ -84,9 +150,34 @@ async def remove_url_from_categories(message: types.Message, state: FSMContext):
 
 
 @check_access
-async def get_categories(message: types.Message):
+async def get_categories_avito_1(message: types.Message):
     try:
-        url_list = api.get_categories()
+        url_list = db_handler.get_categories_from_avito_1()
+
+    except Exception:
+        await message.answer('Не удалось получить список категорий')
+    else:
+        if url_list:
+            while True:
+                if url_list:
+                    to_send = []
+                    for i in range(3):
+                        if url_list:
+                            to_send.append(url_list.pop(0)[0])
+
+                    await message.answer(',\n'.join(to_send))
+                    await asyncio.sleep(0.5)
+
+                else:
+                    break
+        else:
+            await message.answer('Cписок пуст')
+
+
+@check_access
+async def get_categories_avito_2(message: types.Message):
+    try:
+        url_list = db_handler.get_categories_from_avito_2()
 
     except Exception:
         await message.answer('Не удалось получить список категорий')
@@ -105,11 +196,150 @@ async def get_categories(message: types.Message):
             await message.answer('Cписок пуст')
 
 
+# Точка входа в машину состояний команды /add_to_blacklist
+@check_access
+async def add_to_blacklist(message: types.Message):
+    await FSMAddToBlackList.get_id.set()
+    await message.answer('Отправьте id продавца для добавление в черный список, для отмены отправьте /cancel')
+
+
+async def add_url_to_blacklist(message: types.Message, state: FSMContext):
+    db_handler.add_to_blacklist(message.text.strip())
+    await message.reply('Продавец успешно добавлен в черный список')
+    await state.finish()
+
+
+# Точка входа в машину состояний команды /remove_from_blacklist
+@check_access
+async def remove_from_blacklist(message: types.Message):
+    await FSMRemoveFromBlackList.get_id.set()
+    await message.answer('Отправьте id продавца для удаления из черного списка, для отмены отправьте /cancel')
+
+
+async def remove_url_from_blacklist(message: types.Message, state: FSMContext):
+    db_handler.remove_from_blacklist(message.text.strip())
+    await message.reply('Продавец успешно удален из черного списка')
+    await state.finish()
+
+
+@check_access
+async def get_blacklist(message: types.Message):
+    url_list = db_handler.get_blacklist()
+    print(db_handler.get_blacklist())
+    try:
+        await message.answer(',\n'.join(url_list))
+    except MessageTextIsEmpty:
+        await message.answer('Черный список пуст')
+
+
+# Точка входа в машину состояний команды /add_stopword
+@check_access
+async def add_stopword(message: types.Message):
+    await FSMAddStopWord.word.set()
+    await message.answer('Отправьте стоп слово для сохранения, для отмены отправьте /cancel')
+
+
+async def push_stopword(message: types.Message, state: FSMContext):
+    db_handler.add_stopword(message.text)
+    await message.reply('Стоп слово успешно добавлено')
+    await state.finish()
+
+
+# Точка входа в машину состояний команды /remove_stopword
+@check_access
+async def remove_stopword(message: types.Message):
+    await FSMRemoveStopWord.word.set()
+    await message.answer('Отправьте стоп слово для его удаления, для отмены отправьте /cancel')
+
+
+async def throw_out_stopword(message: types.Message, state: FSMContext):
+    db_handler.remove_stopword(message.text)
+    await message.reply('Стоп слово успешно удалено')
+    await state.finish()
+
+
+@check_access
+async def get_stopwords(message: types.Message):
+    words = db_handler.get_stopwords()
+
+    try:
+        await message.answer(',\n'.join(words))
+    except MessageTextIsEmpty:
+        await message.answer('Стоп слова отсутствуют')
+
+
+# ===============================Юзеры==========================================
+# Точка входа в машину состояний команды /add_user
+@check_access
+async def add_user(message: types.Message):
+    await FSMAddUser.get_chat_id.set()
+    await message.answer('Отправьте чат id для добавления нового пользователя, для отмены отправьте /cancel')
+
+
+async def add_user_to_db(message: types.Message, state: FSMContext):
+    if message.text.isdigit():
+        db_handler.add_user(message.text)
+        await message.reply('Пользователь успешно добавлен')
+
+    else:
+        await message.reply('Введен некорректный чат id')
+
+
+    await state.finish()
+
+
+# Точка входа в машину состояний команды /remove_user
+@check_access
+async def remove_user(message: types.Message):
+    await FSMRemoveUser.get_chat_id.set()
+    await message.answer('Отправьте чат id для удаления пользователя, для отмены отправьте /cancel')
+
+
+async def remove_user_from_db(message: types.Message, state: FSMContext):
+    db_handler.remove_user(message.text)
+    await message.reply('Пользователь успешно удален')
+    await state.finish()
+
+
+@check_access
+async def get_users(message: types.Message):
+    user_list = db_handler.get_users()
+
+    try:
+        await message.answer(',\n'.join([el for el in user_list]))
+    except MessageTextIsEmpty:
+        await message.answer('Cписок пуст')
+
+
 def register_admins_handlers(dp: Dispatcher):
     """Регистрация хендлеров этого файла"""
     dp.register_message_handler(cancel_state, commands=['cancel'], state='*')
-    dp.register_message_handler(get_categories, commands=['get_categories'])
-    dp.register_message_handler(add_category, commands=['add_category'], state=None)
-    dp.register_message_handler(add_url_to_categories, state=FSMAddCategory.get_url)
-    dp.register_message_handler(remove_category, commands=['remove_category'], state=None)
-    dp.register_message_handler(remove_url_from_categories, state=FSMRemoveCategory.get_url)
+    dp.register_message_handler(get_categories_avito_1, commands=['get_categories_avito_1'])
+    dp.register_message_handler(add_category_avito_1, commands=['add_category_avito_1'], state=None)
+    dp.register_message_handler(add_url_to_categories_avito_1, state=FSMAddCategoryAvito1.get_url)
+    dp.register_message_handler(remove_category_avito_1, commands=['remove_category_avito_1'], state=None)
+    dp.register_message_handler(remove_url_from_categories_avito_1, state=FSMRemoveCategoryAvito1.get_url)
+
+    dp.register_message_handler(get_categories_avito_2, commands=['get_categories_avito_2'])
+    dp.register_message_handler(add_category_avito_2, commands=['add_category_avito_2'], state=None)
+    dp.register_message_handler(add_url_to_categories_avito_2, state=FSMAddCategoryAvito2.get_url)
+    dp.register_message_handler(remove_category_avito_2, commands=['remove_category_avito_2'], state=None)
+    dp.register_message_handler(remove_url_from_categories_avito_2, state=FSMRemoveCategoryAvito2.get_url)
+
+    dp.register_message_handler(get_blacklist, commands=['get_blacklist'])
+    dp.register_message_handler(add_to_blacklist, commands=['add_to_blacklist'], state=None)
+    dp.register_message_handler(add_url_to_blacklist, state=FSMAddToBlackList.get_id)
+    dp.register_message_handler(remove_from_blacklist, commands=['remove_from_blacklist'], state=None)
+    dp.register_message_handler(remove_url_from_blacklist, state=FSMRemoveFromBlackList.get_id)
+
+    dp.register_message_handler(add_stopword, commands=['add_stopword'], state=None)
+    dp.register_message_handler(push_stopword, state=FSMAddStopWord.word)
+    dp.register_message_handler(get_stopwords, commands=['get_stopwords'])
+    dp.register_message_handler(remove_stopword, commands=['remove_stopword'], state=None)
+    dp.register_message_handler(throw_out_stopword, state=FSMRemoveStopWord.word)
+
+    dp.register_message_handler(get_users, commands=['get_users'])
+    dp.register_message_handler(add_user, commands=['add_user'], state=None)
+    dp.register_message_handler(add_user_to_db, state=FSMAddUser.get_chat_id)
+    dp.register_message_handler(remove_user, commands=['remove_user'], state=None)
+    dp.register_message_handler(remove_user_from_db, state=FSMRemoveUser.get_chat_id)

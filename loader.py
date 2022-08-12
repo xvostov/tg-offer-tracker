@@ -3,12 +3,13 @@ from flask import Flask
 from aiogram import Bot, Dispatcher
 from settings import bot_token
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from db import DataBaseHandler
 # from db import DataBaseHandler
 import configparser
 
 msg_pool = []
 
-
+db_handler = DataBaseHandler()
 # is_available = True
 # db = DataBaseHandler()
 storage = MemoryStorage()

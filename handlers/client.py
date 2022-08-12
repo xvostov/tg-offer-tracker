@@ -29,4 +29,4 @@ def register_client_handlers(dp: Dispatcher):
     """Регистрация хендлеров этого файла"""
     dp.register_message_handler(start, commands=['start', 'help'])
     dp.register_message_handler(get_id, commands=['id'])
-    dp.register_message_handler(get_dev, commands=['dev'])
+    # dp.register_message_handler(get_dev, commands=['dev'])

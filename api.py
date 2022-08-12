@@ -39,29 +39,30 @@ def listen():
 
 
 
-def base_request_to_api(cmd, url, token):
-    resp = requests.post(f'http://{olx_api_address}/categories', json={
-        'token': token,
-        'cmd': cmd,
-        'url': url
-    }, timeout=1)
+# def base_request_to_api(cmd, url, token):
+#     resp = requests.post(f'http://{olx_api_address}/categories', json={
+#         'token': token,
+#         'cmd': cmd,
+#         'url': url
+#     }, timeout=1)
 
-    if resp.status_code != 200:
-        raise HTTPError(f'Неверный ответ сервера, статус код: {resp.status_code}')
-
-
-def add_category(url):
-    return base_request_to_api(cmd='add', url=url, token=olx_api_token)
+    # if resp.status_code != 200:
+    #     raise HTTPError(f'Неверный ответ сервера, статус код: {resp.status_code}')
 
 
-def remove_category(url):
-    return base_request_to_api(cmd='remove', url=url, token=olx_api_token)
+# def add_category(url):
+#     # return base_request_to_api(cmd='add', url=url, token=olx_api_token)
+#
+#
+# def remove_category(url):
+#     # return base_request_to_api(cmd='remove', url=url, token=olx_api_token)
 
 
-def get_categories():
-    resp = requests.get(f'http://{olx_api_address}/categories', json={'token': olx_api_token}, timeout=1)
-
-    if resp.status_code != 200:
-        raise HTTPError(f'Неверный ответ сервера, статус код: {resp.status_code}')
-
-    return resp.json()['categories']
+# def get_categories():
+    # resp = requests.get(f'http://{olx_api_address}/categories', json={'token': olx_api_token}, timeout=1)
+    #
+    # if resp.status_code != 200:
+    #     raise HTTPError(f'Неверный ответ сервера, статус код: {resp.status_code}')
+    #
+    #
+    # return resp.json()['categories']

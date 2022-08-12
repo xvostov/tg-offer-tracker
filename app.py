@@ -3,7 +3,8 @@ import asyncio
 from aiogram import executor
 from settings import admins_list
 # from loader import bot, dp, loop, db
-from loader import bot, dp, loop, msg_pool
+from loader import bot, dp, loop, msg_pool, db_handler
+from loguru import logger
 
 from handlers import client, admins
 from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
@@ -29,9 +30,18 @@ async def msg_handler():
         if msg_pool:
             # print(msg_pool)
             offer = msg_pool.pop(0)
-            for admin_id in admins_list:
-                await bot.send_photo(admin_id, offer.img_url)
-                await bot.send_message(admin_id, f'{offer.title}\n\n{offer.description}\n{offer.price}\n{offer.url}')
+            for admin_id in admins_list + db_handler.get_users():
+
+                try:
+                    await bot.send_photo(admin_id, offer.img_url)
+                except Exception:
+                    logger.error(f"Couldn't send photo to {admin_id}")
+
+                try:
+                    await bot.send_message(admin_id, f'{offer.title}\n\n{offer.description}\n{offer.price}\n{offer.url}')
+                except Exception:
+                    logger.error(f"Couldn't send text to {admin_id}")
+
         await asyncio.sleep(1)
 
 if __name__ == '__main__':
