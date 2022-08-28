@@ -2,7 +2,7 @@ import requests
 from flask import request
 from loader import bot, app, msg_pool
 from offer import Offer
-from settings import api_token, olx_api_token, olx_api_address
+from settings import api_token
 from waitress import serve
 import threading
 import requests
