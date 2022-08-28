@@ -335,7 +335,7 @@ async def add_url_to_categories_olx(message: types.Message, state: FSMContext):
             "cmd": "add",
             "url": message.text
         }
-        resp = requests.post('http://45.147.200.229:8080', json=json)
+        resp = requests.post('http://45.147.200.229:8080/categories', json=json)
         resp.raise_for_status()
 
     except Exception:
@@ -360,7 +360,7 @@ async def remove_url_from_categories_olx(message: types.Message, state: FSMConte
             "cmd": "remove",
             "url": message.text
         }
-        resp = requests.post('http://45.147.200.229:8080', json=json)
+        resp = requests.post('http://45.147.200.229:8080/categories', json=json)
         resp.raise_for_status()
 
     except Exception:
@@ -377,9 +377,8 @@ async def get_categories_olx(message: types.Message):
     try:
         json = {
             "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
-            "url": message.text
         }
-        resp = requests.get('http://45.147.200.229:8080', json=json)
+        resp = requests.get('http://45.147.200.229:8080/categories', json=json)
         resp.raise_for_status()
         url_list = dict(resp.json())
         url_list = url_list.get('categories', '')
