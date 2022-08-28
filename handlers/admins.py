@@ -392,7 +392,7 @@ async def get_categories_olx(message: types.Message):
                     to_send = []
                     for i in range(3):
                         if url_list:
-                            to_send.append(url_list.pop(0)[0])
+                            to_send.append(url_list.pop(0))
 
                     await message.answer(',\n'.join(to_send))
                     await asyncio.sleep(0.5)
