@@ -10,6 +10,7 @@ from loader import dp
 from loader import db_handler
 from loguru import logger
 import asyncio
+import requests
 
 class FSMAddCategoryAvito1(StatesGroup):
     get_url = State()
@@ -42,12 +43,21 @@ class FSMAddStopWord(StatesGroup):
 class FSMRemoveStopWord(StatesGroup):
     word = State()
 
+
 class FSMAddUser(StatesGroup):
     get_chat_id = State()
 
 
 class FSMRemoveUser(StatesGroup):
     get_chat_id = State()
+
+
+class FSMAddCategoryOlx1(StatesGroup):
+    get_url = State()
+
+
+class FSMRemoveCategoryOlx1(StatesGroup):
+    get_url = State()
 
 """Обработчики админских команд"""
 
@@ -311,6 +321,89 @@ async def get_users(message: types.Message):
         await message.answer('Cписок пуст')
 
 
+# Точка входа в машину состояний команды /add_category_olx_1
+@check_access
+async def add_category_olx(message: types.Message):
+    await FSMAddCategoryOlx1.get_url.set()
+    await message.answer('Отправьте ссылку для добавление в отслеживаемые категории, для отмены отправьте /cancel')
+
+
+async def add_url_to_categories_olx(message: types.Message, state: FSMContext):
+    try:
+        json = {
+            "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
+            "cmd": "add",
+            "url": message.text
+        }
+        resp = requests.post('http://45.147.200.229:8080', json=json)
+        resp.raise_for_status()
+
+    except Exception:
+        await message.reply('Не удалось добавить адрес в отслеживаемые категории')
+    else:
+        await message.reply('Адрес успешно добавлен в отслеживаемые категории')
+
+    finally:
+        await state.finish()
+
+
+@check_access
+async def remove_category_olx(message: types.Message):
+    await FSMRemoveCategoryOlx1.get_url.set()
+    await message.answer('Отправьте ссылку для удаления из отслеживаемых категорий, для отмены отправьте /cancel')
+
+
+async def remove_url_from_categories_olx(message: types.Message, state: FSMContext):
+    try:
+        json = {
+            "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
+            "cmd": "remove",
+            "url": message.text
+        }
+        resp = requests.post('http://45.147.200.229:8080', json=json)
+        resp.raise_for_status()
+
+    except Exception:
+        await message.reply('Не удалось удалить адрес из отслеживаемых')
+    else:
+        await message.reply('Адрес успешно удален из отслеживаемых категорий')
+
+    finally:
+        await state.finish()
+
+
+@check_access
+async def get_categories_olx(message: types.Message):
+    try:
+        json = {
+            "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
+            "url": message.text
+        }
+        resp = requests.get('http://45.147.200.229:8080', json=json)
+        resp.raise_for_status()
+        url_list = dict(resp.json())
+        url_list = url_list.get('categories', '')
+
+    except Exception:
+        await message.answer('Не удалось получить список категорий')
+    else:
+        if url_list:
+            while True:
+                if url_list:
+                    to_send = []
+                    for i in range(3):
+                        if url_list:
+                            to_send.append(url_list.pop(0)[0])
+
+                    await message.answer(',\n'.join(to_send))
+                    await asyncio.sleep(0.5)
+
+                else:
+                    break
+        else:
+            await message.answer('Cписок пуст')
+
+
 def register_admins_handlers(dp: Dispatcher):
     """Регистрация хендлеров этого файла"""
     dp.register_message_handler(cancel_state, commands=['cancel'], state='*')
@@ -343,3 +436,8 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(add_user_to_db, state=FSMAddUser.get_chat_id)
     dp.register_message_handler(remove_user, commands=['remove_user'], state=None)
     dp.register_message_handler(remove_user_from_db, state=FSMRemoveUser.get_chat_id)
+
+    dp.register_message_handler(add_category_olx, commands=['add_category_olx'], state=None)
+    dp.register_message_handler(add_url_to_categories_olx, state=FSMAddCategoryOlx1.get_url)
+    dp.register_message_handler(remove_category_olx, commands=['remove_category_olx'], state=None)
+    dp.register_message_handler(remove_url_from_categories_olx, state=FSMRemoveCategoryOlx1.get_url)
