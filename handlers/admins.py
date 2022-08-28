@@ -441,3 +441,4 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(add_url_to_categories_olx, state=FSMAddCategoryOlx1.get_url)
     dp.register_message_handler(remove_category_olx, commands=['remove_category_olx'], state=None)
     dp.register_message_handler(remove_url_from_categories_olx, state=FSMRemoveCategoryOlx1.get_url)
+    dp.register_message_handler(get_categories_olx, commands=['get_categories_olx'])
