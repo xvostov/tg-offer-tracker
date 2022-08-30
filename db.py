@@ -263,7 +263,7 @@ class DataBaseHandler:
 
         logger.debug(f'Adding to categories - {url}')
         try:
-            self.mysql_cursor.execute(f"INSERT INTO watch_viewed_links VALUES(%s)", (url, ))
+            self.mysql_cursor.execute(f"INSERT INTO watch_cat_1 VALUES(%s)", (url, ))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
 
@@ -275,7 +275,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from categories - {url}')
-        self.mysql_cursor.execute(f"DELETE FROM watch_viewed_links WHERE url = %s", (url, ))
+        self.mysql_cursor.execute(f"DELETE FROM watch_cat_1 WHERE url = %s", (url, ))
         self.mysql_connection.commit()
         logger.debug('The record was deleted from the database')
 
@@ -283,7 +283,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug('Getting categories')
-        self.mysql_cursor.execute(f"SELECT url FROM watch_viewed_links")
+        self.mysql_cursor.execute(f"SELECT url FROM watch_cat_1")
         resp = self.mysql_cursor.fetchall()
         logger.debug('Categories received')
         return [d for d in resp]
