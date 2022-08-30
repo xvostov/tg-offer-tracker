@@ -59,6 +59,15 @@ class FSMAddCategoryOlx1(StatesGroup):
 class FSMRemoveCategoryOlx1(StatesGroup):
     get_url = State()
 
+
+class FSMAddCategoryWatch(StatesGroup):
+    get_url = State()
+
+
+class FSMRemoveCategoryWatch(StatesGroup):
+    get_url = State()
+
+
 """Обработчики админских команд"""
 
 
@@ -403,6 +412,69 @@ async def get_categories_olx(message: types.Message):
             await message.answer('Cписок пуст')
 
 
+# ===============================================================
+
+# Точка входа в машину состояний команды /add_category_watch
+@check_access
+async def add_category_watch(message: types.Message):
+    await FSMAddCategoryWatch.get_url.set()
+    await message.answer('Отправьте ссылку для добавление в отслеживаемые категории, для отмены отправьте /cancel')
+
+
+async def add_url_to_categories_watch(message: types.Message, state: FSMContext):
+    try:
+        db_handler.add_category_to_watch(message.text)
+
+    except Exception:
+        await message.reply('Не удалось добавить адрес в отслеживаемые категории')
+    else:
+        await message.reply('Адрес успешно добавлен в отслеживаемые категории')
+
+    finally:
+        await state.finish()
+
+
+# Точка входа в машину состояний команды /remove_category_watch
+@check_access
+async def remove_category_watch(message: types.Message):
+    await FSMRemoveCategoryWatch.get_url.set()
+    await message.answer('Отправьте ссылку для удаления из отслеживаемых категорий, для отмены отправьте /cancel')
+
+
+async def remove_url_from_categories_watch(message: types.Message, state: FSMContext):
+    try:
+        db_handler.remove_category_from_watch(message.text)
+    except Exception:
+        await message.reply('Не удалось удалить адрес из отслеживаемых')
+    else:
+        await message.reply('Адрес успешно удален из отслеживаемых категорий')
+
+    finally:
+        await state.finish()
+
+
+@check_access
+async def get_categories_watch(message: types.Message):
+    try:
+        url_list = db_handler.get_categories_from_watch()
+
+    except Exception:
+        await message.answer('Не удалось получить список категорий')
+    else:
+        if url_list:
+            for el in url_list:
+                to_send = []
+                for i in range(3):
+                    if url_list:
+                        to_send.append(url_list.pop(0)[0])
+
+                await message.answer(',\n'.join(to_send))
+                to_send.clear()
+
+        else:
+            await message.answer('Cписок пуст')
+
+
 def register_admins_handlers(dp: Dispatcher):
     """Регистрация хендлеров этого файла"""
     dp.register_message_handler(cancel_state, commands=['cancel'], state='*')
@@ -441,3 +513,9 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(remove_category_olx, commands=['remove_category_olx'], state=None)
     dp.register_message_handler(remove_url_from_categories_olx, state=FSMRemoveCategoryOlx1.get_url)
     dp.register_message_handler(get_categories_olx, commands=['get_categories_olx'])
+
+    dp.register_message_handler(add_category_watch, commands=['add_category_watch'], state=None)
+    dp.register_message_handler(add_url_to_categories_watch, state=FSMAddCategoryWatch.get_url)
+    dp.register_message_handler(remove_category_watch, commands=['remove_category_watch'], state=None)
+    dp.register_message_handler(remove_url_from_categories_watch, state=FSMRemoveCategoryWatch.get_url)
+    dp.register_message_handler(get_categories_watch, commands=['get_categories_watch'])
