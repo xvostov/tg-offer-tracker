@@ -15,6 +15,8 @@ class DataBaseHandler:
                                                 password=db_password,
                                                 database=db_name,
                                                 charset='utf8mb4')
+
+        self.mysql_connection.autocommit(True)
         self.mysql_cursor = self.mysql_connection.cursor()
 
         # Проверка и создание отсутствующих таблицы
