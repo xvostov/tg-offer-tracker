@@ -31,11 +31,11 @@ async def msg_handler():
             # print(msg_pool)
             offer = msg_pool.pop(0)
             for admin_id in admins_list + db_handler.get_users():
-
-                try:
-                    await bot.send_photo(admin_id, offer.img_url)
-                except Exception:
-                    logger.error(f"Couldn't send photo to {admin_id}")
+                if offer.img_url:
+                    try:
+                        await bot.send_photo(admin_id, offer.img_url)
+                    except Exception:
+                        logger.error(f"Couldn't send photo to {admin_id}")
 
                 try:
                     await bot.send_message(admin_id, f'{offer.title}\n\n{offer.description}\n{offer.price}\n{offer.url}')
