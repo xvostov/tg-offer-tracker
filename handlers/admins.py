@@ -566,7 +566,7 @@ async def get_blacklist_olx(message: types.Message):
 # Точка входа в машину состояний команды /add_stopword_olx
 @check_access
 async def add_stopword_olx(message: types.Message):
-    await FSMAddStopwordOlx.get_id.set()
+    await FSMAddStopwordOlx.word.set()
     await message.answer('Отправьте стоп слово для добавления, для отмены отправьте /cancel')
 
 
@@ -591,7 +591,7 @@ async def push_stopword_olx(message: types.Message, state: FSMContext):
 # Точка входа в машину состояний команды /remove_from_blacklist
 @check_access
 async def remove_stopword_olx(message: types.Message):
-    await FSMRemoveStopwordOlx.get_id.set()
+    await FSMRemoveStopwordOlx.word.set()
     await message.answer('Отправьте стоп слово для удаления, для отмены отправьте /cancel')
 
 
