@@ -600,7 +600,7 @@ async def remove_stopword_from_olx(message: types.Message, state: FSMContext):
         json = {
             "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
             "cmd": "remove",
-            "url": message.text
+            "word": message.text
         }
         resp = requests.post('http://45.147.200.229:8080/stopwords', json=json)
         resp.raise_for_status()
