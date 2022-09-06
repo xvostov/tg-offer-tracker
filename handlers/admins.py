@@ -502,7 +502,7 @@ async def push_to_blacklist_olx(message: types.Message, state: FSMContext):
         json = {
             "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
             "cmd": "add",
-            "url": message.text
+            "user_id": message.text
         }
         resp = requests.post('http://45.147.200.229:8080/blacklist', json=json)
         resp.raise_for_status()
@@ -528,7 +528,7 @@ async def remove_id_from_blacklist_olx(message: types.Message, state: FSMContext
         json = {
             "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
             "cmd": "remove",
-            "url": message.text
+            "user_id": message.text
         }
         resp = requests.post('http://45.147.200.229:8080/blacklist', json=json)
         resp.raise_for_status()
