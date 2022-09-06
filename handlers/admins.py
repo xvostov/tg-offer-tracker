@@ -551,7 +551,7 @@ async def get_blacklist_olx(message: types.Message):
         resp = requests.get('http://45.147.200.229:8080/blacklist', json=json)
         resp.raise_for_status()
         url_list = dict(resp.json())
-        url_list = url_list.get('categories', '')
+        url_list = url_list.get('ids', '')
 
     except Exception:
         await message.answer('Не удалось получить список категорий')
