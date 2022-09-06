@@ -68,6 +68,22 @@ class FSMRemoveCategoryWatch(StatesGroup):
     get_url = State()
 
 
+class FSMAddToBlackListOlx(StatesGroup):
+    get_id = State()
+
+
+class FSMRemoveFromBlackListOlx(StatesGroup):
+    get_id = State()
+
+
+class FSMAddStopwordOlx(StatesGroup):
+    word = State()
+
+
+class FSMRemoveStopwordOlx(StatesGroup):
+    word = State()
+
+
 """Обработчики админских команд"""
 
 
@@ -474,6 +490,149 @@ async def get_categories_watch(message: types.Message):
         else:
             await message.answer('Cписок пуст')
 
+# Точка входа в машину состояний команды /add_to_blacklist_olx
+@check_access
+async def add_to_blacklist_olx(message: types.Message):
+    await FSMAddToBlackListOlx.get_id.set()
+    await message.answer('Отправьте id продавца для добавление в черный список, для отмены отправьте /cancel')
+
+
+async def push_to_blacklist_olx(message: types.Message, state: FSMContext):
+    try:
+        json = {
+            "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
+            "cmd": "add",
+            "url": message.text
+        }
+        resp = requests.post('http://45.147.200.229:8080/blacklist', json=json)
+        resp.raise_for_status()
+
+    except Exception:
+        await message.reply('Не удалось добавить id в черный список')
+    else:
+        await message.reply('Продавец успешно добавлен в черный список')
+
+    finally:
+        await state.finish()
+
+
+# Точка входа в машину состояний команды /remove_from_blacklist
+@check_access
+async def remove_from_blacklist_olx(message: types.Message):
+    await FSMRemoveFromBlackListOlx.get_id.set()
+    await message.answer('Отправьте id продавца для удаления из черного списка, для отмены отправьте /cancel')
+
+
+async def remove_id_from_blacklist_olx(message: types.Message, state: FSMContext):
+    try:
+        json = {
+            "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
+            "cmd": "remove",
+            "url": message.text
+        }
+        resp = requests.post('http://45.147.200.229:8080/blacklist', json=json)
+        resp.raise_for_status()
+
+    except Exception:
+        await message.reply('Не удалось удалить id из черного списка')
+    else:
+        await message.reply('Продавец успешно удален из черного списка')
+
+    finally:
+        await state.finish()
+
+
+@check_access
+async def get_blacklist_olx(message: types.Message):
+    try:
+        json = {
+            "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
+        }
+        resp = requests.get('http://45.147.200.229:8080/blacklist', json=json)
+        resp.raise_for_status()
+        url_list = dict(resp.json())
+        url_list = url_list.get('categories', '')
+
+    except Exception:
+        await message.answer('Не удалось получить список категорий')
+    else:
+        try:
+            await message.answer(',\n'.join(url_list))
+        except MessageTextIsEmpty:
+            await message.answer('Черный список пуст')
+
+
+# ================
+# Точка входа в машину состояний команды /add_stopword_olx
+@check_access
+async def add_stopword_olx(message: types.Message):
+    await FSMAddStopwordOlx.get_id.set()
+    await message.answer('Отправьте стоп слово для добавления, для отмены отправьте /cancel')
+
+
+async def push_stopword_olx(message: types.Message, state: FSMContext):
+    try:
+        json = {
+            "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
+            "cmd": "add",
+            "url": message.text
+        }
+        resp = requests.post('http://45.147.200.229:8080/stopwords', json=json)
+        resp.raise_for_status()
+
+    except Exception:
+        await message.reply('Не удалось добавить стоп слово')
+    else:
+        await message.reply('Стоп слово успешно добавлено')
+
+    finally:
+        await state.finish()
+
+# Точка входа в машину состояний команды /remove_from_blacklist
+@check_access
+async def remove_stopword_olx(message: types.Message):
+    await FSMRemoveStopwordOlx.get_id.set()
+    await message.answer('Отправьте стоп слово для удаления, для отмены отправьте /cancel')
+
+
+async def remove_stopword_from_olx(message: types.Message, state: FSMContext):
+    try:
+        json = {
+            "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
+            "cmd": "remove",
+            "url": message.text
+        }
+        resp = requests.post('http://45.147.200.229:8080/stopwords', json=json)
+        resp.raise_for_status()
+
+    except Exception:
+        await message.reply('Не удалось удалить стоп слово')
+    else:
+        await message.reply('Стоп слово успешно удалено')
+
+    finally:
+        await state.finish()
+
+
+@check_access
+async def get_stopwords_olx(message: types.Message):
+    try:
+        json = {
+            "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
+        }
+        resp = requests.get('http://45.147.200.229:8080/stopwords', json=json)
+        resp.raise_for_status()
+        words = dict(resp.json())
+        words = words.get('words', '')
+
+    except Exception:
+        await message.answer('Не удалось получить список стоп слов')
+    else:
+        try:
+            await message.answer(',\n'.join(words))
+        except MessageTextIsEmpty:
+            await message.answer('Список стоп слов пуст')
+
 
 def register_admins_handlers(dp: Dispatcher):
     """Регистрация хендлеров этого файла"""
@@ -519,3 +678,15 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(remove_category_watch, commands=['remove_category_watch'], state=None)
     dp.register_message_handler(remove_url_from_categories_watch, state=FSMRemoveCategoryWatch.get_url)
     dp.register_message_handler(get_categories_watch, commands=['get_categories_watch'])
+
+    dp.register_message_handler(get_blacklist_olx, commands=['get_blacklist_olx'])
+    dp.register_message_handler(add_to_blacklist_olx, commands=['add_to_blacklist_olx'], state=None)
+    dp.register_message_handler(push_to_blacklist_olx, state=FSMAddToBlackListOlx.get_id)
+    dp.register_message_handler(remove_from_blacklist_olx, commands=['remove_from_blacklist_olx'], state=None)
+    dp.register_message_handler(remove_id_from_blacklist_olx, state=FSMRemoveFromBlackListOlx.get_id)
+
+    dp.register_message_handler(add_stopword_olx, commands=['add_stopword_olx'], state=None)
+    dp.register_message_handler(push_stopword_olx, state=FSMAddStopwordOlx.word)
+    dp.register_message_handler(get_stopwords_olx, commands=['get_stopwords_olx'])
+    dp.register_message_handler(remove_stopword_olx, commands=['remove_stopword_olx'], state=None)
+    dp.register_message_handler(remove_stopword_from_olx, state=FSMRemoveStopwordOlx.word)
