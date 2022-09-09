@@ -12,6 +12,7 @@ from loguru import logger
 import asyncio
 import requests
 
+
 class FSMAddCategoryAvito1(StatesGroup):
     get_url = State()
 
@@ -84,6 +85,14 @@ class FSMRemoveStopwordOlx(StatesGroup):
     word = State()
 
 
+class FSMAddCategoryLalafo(StatesGroup):
+    get_url = State()
+
+
+class FSMRemoveCategoryLalafo(StatesGroup):
+    get_url = State()
+
+
 """Обработчики админских команд"""
 
 
@@ -128,6 +137,7 @@ async def add_url_to_categories_avito_1(message: types.Message, state: FSMContex
     finally:
         await state.finish()
 
+
 # Точка входа в машину состояний команды /add_category
 @check_access
 async def add_category_avito_2(message: types.Message):
@@ -147,6 +157,7 @@ async def add_url_to_categories_avito_2(message: types.Message, state: FSMContex
     finally:
         await state.finish()
 
+
 # Точка входа в машину состояний команды /remove_category
 @check_access
 async def remove_category_avito_1(message: types.Message):
@@ -164,6 +175,7 @@ async def remove_url_from_categories_avito_1(message: types.Message, state: FSMC
 
     finally:
         await state.finish()
+
 
 # Точка входа в машину состояний команды /remove_category
 @check_access
@@ -318,7 +330,6 @@ async def add_user_to_db(message: types.Message, state: FSMContext):
 
     else:
         await message.reply('Введен некорректный чат id')
-
 
     await state.finish()
 
@@ -490,6 +501,7 @@ async def get_categories_watch(message: types.Message):
         else:
             await message.answer('Cписок пуст')
 
+
 # Точка входа в машину состояний команды /add_to_blacklist_olx
 @check_access
 async def add_to_blacklist_olx(message: types.Message):
@@ -550,14 +562,14 @@ async def get_blacklist_olx(message: types.Message):
         }
         resp = requests.get('http://45.147.200.229:8080/blacklist', json=json)
         resp.raise_for_status()
-        url_list = dict(resp.json())
-        url_list = url_list.get('ids', '')
+        blacklist = dict(resp.json())
+        blacklist = blacklist.get('ids', '')
 
     except Exception:
         await message.answer('Не удалось получить список категорий')
     else:
         try:
-            await message.answer(',\n'.join(url_list))
+            await message.answer(',\n'.join(blacklist))
         except MessageTextIsEmpty:
             await message.answer('Черный список пуст')
 
@@ -587,6 +599,7 @@ async def push_stopword_olx(message: types.Message, state: FSMContext):
 
     finally:
         await state.finish()
+
 
 # Точка входа в машину состояний команды /remove_from_blacklist
 @check_access
@@ -632,6 +645,69 @@ async def get_stopwords_olx(message: types.Message):
             await message.answer(',\n'.join(words))
         except MessageTextIsEmpty:
             await message.answer('Список стоп слов пуст')
+
+
+# =============================
+
+# Точка входа в машину состояний команды /add_category_lalafo
+@check_access
+async def add_category_lalafo(message: types.Message):
+    await FSMAddCategoryLalafo.get_url.set()
+    await message.answer('Отправьте ссылку для добавление в отслеживаемые категории, для отмены отправьте /cancel')
+
+
+async def add_url_to_categories_lalafo(message: types.Message, state: FSMContext):
+    try:
+        db_handler.add_category_to_lalafo(message.text)
+
+    except Exception:
+        await message.reply('Не удалось добавить адрес в отслеживаемые категории')
+    else:
+        await message.reply('Адрес успешно добавлен в отслеживаемые категории')
+
+    finally:
+        await state.finish()
+
+
+# Точка входа в машину состояний команды /remove_category_lalafo
+@check_access
+async def remove_category_watch(message: types.Message):
+    await FSMRemoveCategoryLalafo.get_url.set()
+    await message.answer('Отправьте ссылку для удаления из отслеживаемых категорий, для отмены отправьте /cancel')
+
+
+async def remove_url_from_categories_lalafo(message: types.Message, state: FSMContext):
+    try:
+        db_handler.remove_category_from_lalafo(message.text)
+    except Exception:
+        await message.reply('Не удалось удалить адрес из отслеживаемых')
+    else:
+        await message.reply('Адрес успешно удален из отслеживаемых категорий')
+
+    finally:
+        await state.finish()
+
+
+@check_access
+async def get_categories_watch(message: types.Message):
+    try:
+        url_list = db_handler.get_categories_from_lalafo()
+
+    except Exception:
+        await message.answer('Не удалось получить список категорий')
+    else:
+        if url_list:
+            for el in url_list:
+                to_send = []
+                for i in range(3):
+                    if url_list:
+                        to_send.append(url_list.pop(0)[0])
+
+                await message.answer(',\n'.join(to_send))
+                to_send.clear()
+
+        else:
+            await message.answer('Cписок пуст')
 
 
 def register_admins_handlers(dp: Dispatcher):
@@ -690,3 +766,9 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(get_stopwords_olx, commands=['get_stopwords_olx'])
     dp.register_message_handler(remove_stopword_olx, commands=['remove_stopword_olx'], state=None)
     dp.register_message_handler(remove_stopword_from_olx, state=FSMRemoveStopwordOlx.word)
+
+    dp.register_message_handler(add_category_watch, commands=['add_category_lalafo'], state=None)
+    dp.register_message_handler(add_url_to_categories_watch, state=FSMAddCategoryLalafo.get_url)
+    dp.register_message_handler(remove_category_watch, commands=['remove_category_lalafo'], state=None)
+    dp.register_message_handler(remove_url_from_categories_watch, state=FSMRemoveCategoryLalafo.get_url)
+    dp.register_message_handler(get_categories_watch, commands=['get_categories_lalafo'])
