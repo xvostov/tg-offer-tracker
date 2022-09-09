@@ -689,7 +689,7 @@ async def remove_url_from_categories_lalafo(message: types.Message, state: FSMCo
 
 
 @check_access
-async def get_categories_watch(message: types.Message):
+async def get_categories_lalafo(message: types.Message):
     try:
         url_list = db_handler.get_categories_from_lalafo()
 
@@ -767,8 +767,8 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(remove_stopword_olx, commands=['remove_stopword_olx'], state=None)
     dp.register_message_handler(remove_stopword_from_olx, state=FSMRemoveStopwordOlx.word)
 
-    dp.register_message_handler(add_category_watch, commands=['add_category_lalafo'], state=None)
+    dp.register_message_handler(add_category_lalafo, commands=['add_category_lalafo'], state=None)
     dp.register_message_handler(add_url_to_categories_lalafo, state=FSMAddCategoryLalafo.get_url)
     dp.register_message_handler(remove_category_lalafo, commands=['remove_category_lalafo'], state=None)
     dp.register_message_handler(remove_url_from_categories_lalafo, state=FSMRemoveCategoryLalafo.get_url)
-    dp.register_message_handler(get_categories_watch, commands=['get_categories_lalafo'])
+    dp.register_message_handler(get_categories_lalafo, commands=['get_categories_lalafo'])

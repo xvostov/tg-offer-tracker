@@ -14,7 +14,8 @@ class DataBaseHandler:
                                                 user=db_user,
                                                 password=db_password,
                                                 database=db_name,
-                                                charset='utf8mb4')
+                                                charset='utf8mb4',
+                                                autocommit=True)
 
         self.mysql_connection.autocommit(True)
         self.mysql_cursor = self.mysql_connection.cursor()
