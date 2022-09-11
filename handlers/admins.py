@@ -93,6 +93,13 @@ class FSMRemoveCategoryLalafo(StatesGroup):
     get_url = State()
 
 
+class FSMAddStopWordLalafo(StatesGroup):
+    word = State()
+
+
+class FSMRemoveStopWordLalafo(StatesGroup):
+    word = State()
+
 """Обработчики админских команд"""
 
 
@@ -709,6 +716,42 @@ async def get_categories_lalafo(message: types.Message):
         else:
             await message.answer('Cписок пуст')
 
+# ===============================
+
+# Точка входа в машину состояний команды /add_stopword_lalafo
+@check_access
+async def add_stopword_lalafo(message: types.Message):
+    await FSMAddStopWordLalafo.word.set()
+    await message.answer('Отправьте стоп слово для сохранения, для отмены отправьте /cancel')
+
+
+async def push_stopword_lalafo(message: types.Message, state: FSMContext):
+    db_handler.add_stopword_lalafo(message.text)
+    await message.reply('Стоп слово успешно добавлено')
+    await state.finish()
+
+
+# Точка входа в машину состояний команды /remove_stopword
+@check_access
+async def remove_stopword_lalafo(message: types.Message):
+    await FSMRemoveStopWordLalafo.word.set()
+    await message.answer('Отправьте стоп слово для его удаления, для отмены отправьте /cancel')
+
+
+async def throw_out_stopword_lalafo(message: types.Message, state: FSMContext):
+    db_handler.remove_stopword_lalafo(message.text)
+    await message.reply('Стоп слово успешно удалено')
+    await state.finish()
+
+
+@check_access
+async def get_stopwords_lalafo(message: types.Message):
+    words = db_handler.get_stopwords_lalafo()
+
+    try:
+        await message.answer(',\n'.join(words))
+    except MessageTextIsEmpty:
+        await message.answer('Стоп слова отсутствуют')
 
 def register_admins_handlers(dp: Dispatcher):
     """Регистрация хендлеров этого файла"""
@@ -772,3 +815,9 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(remove_category_lalafo, commands=['remove_category_lalafo'], state=None)
     dp.register_message_handler(remove_url_from_categories_lalafo, state=FSMRemoveCategoryLalafo.get_url)
     dp.register_message_handler(get_categories_lalafo, commands=['get_categories_lalafo'])
+
+    dp.register_message_handler(add_stopword_lalafo, commands=['add_stopword_lalafo'], state=None)
+    dp.register_message_handler(push_stopword_lalafo, state=FSMAddStopWordLalafo.word)
+    dp.register_message_handler(get_stopwords_lalafo, commands=['get_stopwords_lalafo'])
+    dp.register_message_handler(remove_stopword_lalafo, commands=['remove_stopword_lalafo'], state=None)
+    dp.register_message_handler(throw_out_stopword_lalafo, state=FSMRemoveStopWordlalafo.word)

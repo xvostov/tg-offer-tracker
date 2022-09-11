@@ -68,6 +68,12 @@ class DataBaseHandler:
         PRIMARY KEY(seller_id))""")
 
 
+        logger.debug('Checking the om "stopwords_lalafo" table')
+        self.mysql_cursor.execute("""
+        CREATE TABLE IF NOT EXISTS stopwords_lalafo (
+        word VARCHAR(200) NOT NULL)""")
+
+
         logger.debug('Initialization of settings')
         try:
             self.mysql_cursor.execute("INSERT INTO settings (name, value) VALUES ('delay', '1')")
@@ -320,3 +326,32 @@ class DataBaseHandler:
         resp = self.mysql_cursor.fetchall()
         logger.debug('Categories received')
         return [d for d in resp]
+
+    def add_stopword_lalafo(self, word: str):
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug(f'Adding to stopwords - {word}')
+
+        try:
+            self.mysql_cursor.execute("INSERT INTO stopwords_lalafo VALUES(%s)", (word, ))
+        except pymysql.err.IntegrityError:
+            logger.error('Failed to add to the database')
+        else:
+            self.mysql_connection.commit()
+        logger.debug('The word has been added to stopwords')
+
+    def remove_stopword_lalafo(self, word: str):
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug(f'Deleting from stopwords - {word}')
+        self.mysql_cursor.execute("DELETE FROM stopwords_lalafo WHERE word = %s", (word, ))
+        self.mysql_connection.commit()
+        logger.debug('The word has been deleted from stopwords')
+
+    def get_stopwords_lalafo(self) -> List:
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug('Getting stopwords')
+        self.mysql_cursor.execute("SELECT word FROM stopwords_lalafo")
+        resp = self.mysql_cursor.fetchall()
+        return [d[0] for d in resp]
