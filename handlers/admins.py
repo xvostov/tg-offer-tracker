@@ -820,4 +820,4 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(push_stopword_lalafo, state=FSMAddStopWordLalafo.word)
     dp.register_message_handler(get_stopwords_lalafo, commands=['get_stopwords_lalafo'])
     dp.register_message_handler(remove_stopword_lalafo, commands=['remove_stopword_lalafo'], state=None)
-    dp.register_message_handler(throw_out_stopword_lalafo, state=FSMRemoveStopWordlalafo.word)
+    dp.register_message_handler(throw_out_stopword_lalafo, state=FSMRemoveStopWordLalafo.word)
