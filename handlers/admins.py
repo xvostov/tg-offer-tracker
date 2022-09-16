@@ -100,6 +100,14 @@ class FSMAddStopWordLalafo(StatesGroup):
 class FSMRemoveStopWordLalafo(StatesGroup):
     word = State()
 
+
+class FSMAddCategoryYoula(StatesGroup):
+    get_url = State()
+
+
+class FSMRemoveCategoryYoula(StatesGroup):
+    get_url = State()
+
 """Обработчики админских команд"""
 
 
@@ -753,6 +761,70 @@ async def get_stopwords_lalafo(message: types.Message):
     except MessageTextIsEmpty:
         await message.answer('Стоп слова отсутствуют')
 
+
+# ========================
+
+# Точка входа в машину состояний команды /add_category_youla
+@check_access
+async def add_category_youla(message: types.Message):
+    await FSMAddCategoryYoula.get_url.set()
+    await message.answer('Отправьте ссылку для добавление в отслеживаемые категории, для отмены отправьте /cancel')
+
+
+async def add_url_to_categories_youla(message: types.Message, state: FSMContext):
+    try:
+        db_handler.add_category_to_youla(message.text)
+
+    except Exception:
+        await message.reply('Не удалось добавить адрес в отслеживаемые категории')
+    else:
+        await message.reply('Адрес успешно добавлен в отслеживаемые категории')
+
+    finally:
+        await state.finish()
+
+
+# Точка входа в машину состояний команды /remove_category_youla
+@check_access
+async def remove_category_youla(message: types.Message):
+    await FSMRemoveCategoryYoula.get_url.set()
+    await message.answer('Отправьте ссылку для удаления из отслеживаемых категорий, для отмены отправьте /cancel')
+
+
+async def remove_url_from_categories_youla(message: types.Message, state: FSMContext):
+    try:
+        db_handler.remove_category_from_youla(message.text)
+    except Exception:
+        await message.reply('Не удалось удалить адрес из отслеживаемых')
+    else:
+        await message.reply('Адрес успешно удален из отслеживаемых категорий')
+
+    finally:
+        await state.finish()
+
+
+@check_access
+async def get_categories_youla(message: types.Message):
+    try:
+        url_list = db_handler.get_categories_from_youla()
+
+    except Exception:
+        await message.answer('Не удалось получить список категорий')
+    else:
+        if url_list:
+            for el in url_list:
+                to_send = []
+                for i in range(3):
+                    if url_list:
+                        to_send.append(url_list.pop(0)[0])
+
+                await message.answer(',\n'.join(to_send))
+                to_send.clear()
+
+        else:
+            await message.answer('Cписок пуст')
+
+
 def register_admins_handlers(dp: Dispatcher):
     """Регистрация хендлеров этого файла"""
     dp.register_message_handler(cancel_state, commands=['cancel'], state='*')
@@ -821,3 +893,9 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(get_stopwords_lalafo, commands=['get_stopwords_lalafo'])
     dp.register_message_handler(remove_stopword_lalafo, commands=['remove_stopword_lalafo'], state=None)
     dp.register_message_handler(throw_out_stopword_lalafo, state=FSMRemoveStopWordLalafo.word)
+
+    dp.register_message_handler(add_category_youla, commands=['add_category_youla'], state=None)
+    dp.register_message_handler(add_url_to_categories_youla, state=FSMAddCategoryYoula.get_url)
+    dp.register_message_handler(remove_category_youla, commands=['remove_category_youla'], state=None)
+    dp.register_message_handler(remove_url_from_categories_youla, state=FSMRemoveCategoryYoula.get_url)
+    dp.register_message_handler(get_categories_youla, commands=['get_categories_youla'])

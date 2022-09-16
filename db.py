@@ -355,3 +355,35 @@ class DataBaseHandler:
         self.mysql_cursor.execute("SELECT word FROM stopwords_lalafo")
         resp = self.mysql_cursor.fetchall()
         return [d[0] for d in resp]
+
+    # ==================
+
+    def add_category_to_youla(self, url: str):
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug(f'Adding to categories - {url}')
+        try:
+            self.mysql_cursor.execute(f"INSERT INTO youla_cat_1 VALUES(%s)", (url, ))
+        except pymysql.err.IntegrityError:
+            logger.error('Failed to add to the database')
+
+        else:
+            self.mysql_connection.commit()
+            logger.debug('The url has been added to categories')
+
+    def remove_category_from_youla(self, url: str):
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug(f'Deleting from categories - {url}')
+        self.mysql_cursor.execute(f"DELETE FROM youla_cat_1 WHERE url = %s", (url, ))
+        self.mysql_connection.commit()
+        logger.debug('The record was deleted from the database')
+
+    def get_categories_from_youla(self) -> List:
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug('Getting categories')
+        self.mysql_cursor.execute(f"SELECT url FROM youla_cat_1")
+        resp = self.mysql_cursor.fetchall()
+        logger.debug('Categories received')
+        return [d for d in resp]
