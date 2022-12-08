@@ -108,6 +108,14 @@ class FSMAddCategoryYoula(StatesGroup):
 class FSMRemoveCategoryYoula(StatesGroup):
     get_url = State()
 
+
+class FSMAddCategoryAvito3(StatesGroup):
+    get_url = State()
+
+
+class FSMRemoveCategoryAvito3(StatesGroup):
+    get_url = State()
+
 """Обработчики админских команд"""
 
 
@@ -172,6 +180,24 @@ async def add_url_to_categories_avito_2(message: types.Message, state: FSMContex
     finally:
         await state.finish()
 
+# Точка входа в машину состояний команды /add_category
+@check_access
+async def add_category_avito_3(message: types.Message):
+    await FSMAddCategoryAvito3.get_url.set()
+    await message.answer('Отправьте ссылку для добавление в отслеживаемые категории, для отмены отправьте /cancel')
+
+
+async def add_url_to_categories_avito_3(message: types.Message, state: FSMContext):
+    try:
+        db_handler.add_category_to_avito_3(message.text)
+
+    except Exception:
+        await message.reply('Не удалось добавить адрес в отслеживаемые категории')
+    else:
+        await message.reply('Адрес успешно добавлен в отслеживаемые категории')
+
+    finally:
+        await state.finish()
 
 # Точка входа в машину состояний команды /remove_category
 @check_access
@@ -210,6 +236,24 @@ async def remove_url_from_categories_avito_2(message: types.Message, state: FSMC
     finally:
         await state.finish()
 
+# Точка входа в машину состояний команды /remove_category
+@check_access
+async def remove_category_avito_3(message: types.Message):
+    await FSMRemoveCategoryAvito3.get_url.set()
+    await message.answer('Отправьте ссылку для удаления из отслеживаемых категорий, для отмены отправьте /cancel')
+
+
+async def remove_url_from_categories_avito_3(message: types.Message, state: FSMContext):
+    try:
+        db_handler.remove_category_from_avito_3(message.text)
+    except Exception:
+        await message.reply('Не удалось удалить адрес из отслеживаемых')
+    else:
+        await message.reply('Адрес успешно удален из отслеживаемых категорий')
+
+    finally:
+        await state.finish()
+
 
 @check_access
 async def get_categories_avito_1(message: types.Message):
@@ -240,6 +284,28 @@ async def get_categories_avito_1(message: types.Message):
 async def get_categories_avito_2(message: types.Message):
     try:
         url_list = db_handler.get_categories_from_avito_2()
+
+    except Exception:
+        await message.answer('Не удалось получить список категорий')
+    else:
+        if url_list:
+            for el in url_list:
+                to_send = []
+                for i in range(3):
+                    if url_list:
+                        to_send.append(url_list.pop(0)[0])
+
+                await message.answer(',\n'.join(to_send))
+                to_send.clear()
+
+        else:
+            await message.answer('Cписок пуст')
+
+
+@check_access
+async def get_categories_avito_3(message: types.Message):
+    try:
+        url_list = db_handler.get_categories_from_avito_3()
 
     except Exception:
         await message.answer('Не удалось получить список категорий')
@@ -839,6 +905,13 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(add_url_to_categories_avito_2, state=FSMAddCategoryAvito2.get_url)
     dp.register_message_handler(remove_category_avito_2, commands=['remove_category_avito_2'], state=None)
     dp.register_message_handler(remove_url_from_categories_avito_2, state=FSMRemoveCategoryAvito2.get_url)
+
+    dp.register_message_handler(get_categories_avito_3, commands=['get_categories_avito_3'])
+    dp.register_message_handler(add_category_avito_3, commands=['add_category_avito_3'], state=None)
+    dp.register_message_handler(add_url_to_categories_avito_3, state=FSMAddCategoryAvito3.get_url)
+    dp.register_message_handler(remove_category_avito_3, commands=['remove_category_avito_3'], state=None)
+    dp.register_message_handler(remove_url_from_categories_avito_3, state=FSMRemoveCategoryAvito3.get_url)
+
 
     dp.register_message_handler(get_blacklist, commands=['get_blacklist'])
     dp.register_message_handler(add_to_blacklist, commands=['add_to_blacklist'], state=None)

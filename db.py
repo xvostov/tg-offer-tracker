@@ -55,6 +55,11 @@ class DataBaseHandler:
         CREATE TABLE IF NOT EXISTS сategories_avito_2 (
         url	VARCHAR(255) NOT NULL UNIQUE)""")
 
+        logger.debug('Checking the om "categories" table')
+        self.mysql_cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS сategories_avito_3 (
+        url	VARCHAR(255) NOT NULL UNIQUE)""")
+
         logger.debug('Checking the om "users" table')
         self.mysql_cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -137,6 +142,15 @@ class DataBaseHandler:
         logger.debug('Categories received')
         return [d for d in resp]
 
+    def get_categories_from_avito_3(self) -> List:
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug('Getting categories')
+        self.mysql_cursor.execute(f"SELECT url FROM сategories_avito_3")
+        resp = self.mysql_cursor.fetchall()
+        logger.debug('Categories received')
+        return [d for d in resp]
+
     def add_category_to_avito_1(self, url: str):
         self.mysql_connection.ping(reconnect=True)
 
@@ -163,6 +177,19 @@ class DataBaseHandler:
             self.mysql_connection.commit()
             logger.debug('The url has been added to categories')
 
+    def add_category_to_avito_3(self, url: str):
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug(f'Adding to categories - {url}')
+        try:
+            self.mysql_cursor.execute(f"INSERT INTO сategories_avito_3 VALUES(%s)", (url, ))
+        except pymysql.err.IntegrityError:
+            logger.error('Failed to add to the database')
+
+        else:
+            self.mysql_connection.commit()
+            logger.debug('The url has been added to categories')
+
     def remove_category_from_avito_1(self, url: str):
         self.mysql_connection.ping(reconnect=True)
 
@@ -176,6 +203,14 @@ class DataBaseHandler:
 
         logger.debug(f'Deleting from categories - {url}')
         self.mysql_cursor.execute(f"DELETE FROM сategories_avito_2 WHERE url = %s", (url, ))
+        self.mysql_connection.commit()
+        logger.debug('The record was deleted from the database')
+
+    def remove_category_from_avito_3(self, url: str):
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug(f'Deleting from categories - {url}')
+        self.mysql_cursor.execute(f"DELETE FROM сategories_avito_3 WHERE url = %s", (url, ))
         self.mysql_connection.commit()
         logger.debug('The record was deleted from the database')
 
