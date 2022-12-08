@@ -288,7 +288,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting user - {chat_id}')
-        self.mysql_cursor.execute("DELETE FROM users WHERE chat_id == %s", (chat_id,))
+        self.mysql_cursor.execute("DELETE FROM users WHERE chat_id = %s", (chat_id,))
         self.mysql_connection.commit()
         logger.debug('The user has been deleted')
 
