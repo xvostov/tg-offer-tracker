@@ -495,7 +495,7 @@ async def get_categories_olx(message: types.Message):
         json = {
             "token": "8Z2g5cktbfIxcUrrcruaaZHnSigabnEU2DZ0ykIYa3LkYoppEe",
         }
-        resp = requests.get('http://45.147.200.229:8080/categories', json=json)
+        resp = requests.get('http://46.17.45.135/categories', json=json)
         resp.raise_for_status()
         url_list = dict(resp.json())
         url_list = url_list.get('categories', '')
