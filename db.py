@@ -2,7 +2,7 @@ import os
 import pymysql
 
 from typing import List
-from settings import db_host, db_port,db_user, db_password, db_name
+from settings import db_host, db_port, db_user, db_password, db_name
 from loguru import logger
 
 
@@ -26,8 +26,6 @@ class DataBaseHandler:
         CREATE TABLE IF NOT EXISTS viewed_links (
         url	VARCHAR(200) NOT NULL UNIQUE)""")
 
-
-
         self.mysql_cursor.execute("""
         CREATE TABLE IF NOT EXISTS settings (
         name VARCHAR(50),
@@ -43,7 +41,6 @@ class DataBaseHandler:
         # CREATE TABLE IF NOT EXISTS watchlist (
         # url	VARCHAR(200) NOT NULL UNIQUE,
         # price NUMERIC)""")
-
 
         logger.debug('Checking the om "categories" table')
         self.mysql_cursor.execute(f"""
@@ -72,12 +69,10 @@ class DataBaseHandler:
         seller_id	VARCHAR(200) NOT NULL,
         PRIMARY KEY(seller_id))""")
 
-
         logger.debug('Checking the om "stopwords_lalafo" table')
         self.mysql_cursor.execute("""
         CREATE TABLE IF NOT EXISTS stopwords_lalafo (
         word VARCHAR(200) NOT NULL)""")
-
 
         logger.debug('Initialization of settings')
         try:
@@ -89,8 +84,6 @@ class DataBaseHandler:
             pass
 
         logger.info('DataBaseHandler - ready!')
-
-
 
     def get_viewed_links(self) -> List:
         self.mysql_connection.ping(reconnect=True)
@@ -120,7 +113,7 @@ class DataBaseHandler:
         else:
             delay = str(delay)
 
-        self.mysql_cursor.execute('UPDATE settings SET value = ? WHERE name = "delay"', (delay, ))
+        self.mysql_cursor.execute('UPDATE settings SET value = ? WHERE name = "delay"', (delay,))
         self.mysql_connection.commit()
         logger.debug('The delay has been updated')
 
@@ -156,7 +149,7 @@ class DataBaseHandler:
 
         logger.debug(f'Adding to categories - {url}')
         try:
-            self.mysql_cursor.execute(f"INSERT INTO сategories_avito_1 VALUES(%s)", (url, ))
+            self.mysql_cursor.execute(f"INSERT INTO сategories_avito_1 VALUES(%s)", (url,))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
 
@@ -169,7 +162,7 @@ class DataBaseHandler:
 
         logger.debug(f'Adding to categories - {url}')
         try:
-            self.mysql_cursor.execute(f"INSERT INTO сategories_avito_2 VALUES(%s)", (url, ))
+            self.mysql_cursor.execute(f"INSERT INTO сategories_avito_2 VALUES(%s)", (url,))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
 
@@ -182,7 +175,7 @@ class DataBaseHandler:
 
         logger.debug(f'Adding to categories - {url}')
         try:
-            self.mysql_cursor.execute(f"INSERT INTO сategories_avito_3 VALUES(%s)", (url, ))
+            self.mysql_cursor.execute(f"INSERT INTO сategories_avito_3 VALUES(%s)", (url,))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
 
@@ -194,7 +187,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from categories - {url}')
-        self.mysql_cursor.execute(f"DELETE FROM сategories_avito_1 WHERE url = %s", (url, ))
+        self.mysql_cursor.execute(f"DELETE FROM сategories_avito_1 WHERE url = %s", (url,))
         self.mysql_connection.commit()
         logger.debug('The record was deleted from the database')
 
@@ -202,7 +195,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from categories - {url}')
-        self.mysql_cursor.execute(f"DELETE FROM сategories_avito_2 WHERE url = %s", (url, ))
+        self.mysql_cursor.execute(f"DELETE FROM сategories_avito_2 WHERE url = %s", (url,))
         self.mysql_connection.commit()
         logger.debug('The record was deleted from the database')
 
@@ -210,7 +203,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from categories - {url}')
-        self.mysql_cursor.execute(f"DELETE FROM сategories_avito_3 WHERE url = %s", (url, ))
+        self.mysql_cursor.execute(f"DELETE FROM сategories_avito_3 WHERE url = %s", (url,))
         self.mysql_connection.commit()
         logger.debug('The record was deleted from the database')
 
@@ -220,7 +213,7 @@ class DataBaseHandler:
         print(seller_id)
         logger.debug(f'Adding to blacklist - {seller_id}')
         try:
-            self.mysql_cursor.execute("INSERT INTO blacklist VALUES(%s)", (seller_id, ))
+            self.mysql_cursor.execute("INSERT INTO blacklist VALUES(%s)", (seller_id,))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
         else:
@@ -231,7 +224,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from blacklist - {seller_id}')
-        self.mysql_cursor.execute("DELETE FROM blacklist WHERE seller_id = %s", (seller_id, ))
+        self.mysql_cursor.execute("DELETE FROM blacklist WHERE seller_id = %s", (seller_id,))
         self.mysql_connection.commit()
         logger.debug('The seller_id has been deleted from blacklist')
 
@@ -249,7 +242,7 @@ class DataBaseHandler:
         logger.debug(f'Adding to stopwords - {word}')
 
         try:
-            self.mysql_cursor.execute("INSERT INTO stopwords VALUES(%s)", (word, ))
+            self.mysql_cursor.execute("INSERT INTO stopwords VALUES(%s)", (word,))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
         else:
@@ -260,7 +253,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from stopwords - {word}')
-        self.mysql_cursor.execute("DELETE FROM stopwords WHERE word = %s", (word, ))
+        self.mysql_cursor.execute("DELETE FROM stopwords WHERE word = %s", (word,))
         self.mysql_connection.commit()
         logger.debug('The word has been deleted from stopwords')
 
@@ -305,7 +298,7 @@ class DataBaseHandler:
 
         logger.debug(f'Adding to categories - {url}')
         try:
-            self.mysql_cursor.execute(f"INSERT INTO watch_cat_1 VALUES(%s)", (url, ))
+            self.mysql_cursor.execute(f"INSERT INTO watch_cat_1 VALUES(%s)", (url,))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
 
@@ -317,7 +310,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from categories - {url}')
-        self.mysql_cursor.execute(f"DELETE FROM watch_cat_1 WHERE url = %s", (url, ))
+        self.mysql_cursor.execute(f"DELETE FROM watch_cat_1 WHERE url = %s", (url,))
         self.mysql_connection.commit()
         logger.debug('The record was deleted from the database')
 
@@ -337,7 +330,7 @@ class DataBaseHandler:
 
         logger.debug(f'Adding to categories - {url}')
         try:
-            self.mysql_cursor.execute(f"INSERT INTO lalafo_cat_1 VALUES(%s)", (url, ))
+            self.mysql_cursor.execute(f"INSERT INTO lalafo_cat_1 VALUES(%s)", (url,))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
 
@@ -349,7 +342,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from categories - {url}')
-        self.mysql_cursor.execute(f"DELETE FROM lalafo_cat_1 WHERE url = %s", (url, ))
+        self.mysql_cursor.execute(f"DELETE FROM lalafo_cat_1 WHERE url = %s", (url,))
         self.mysql_connection.commit()
         logger.debug('The record was deleted from the database')
 
@@ -368,7 +361,7 @@ class DataBaseHandler:
         logger.debug(f'Adding to stopwords - {word}')
 
         try:
-            self.mysql_cursor.execute("INSERT INTO stopwords_lalafo VALUES(%s)", (word, ))
+            self.mysql_cursor.execute("INSERT INTO stopwords_lalafo VALUES(%s)", (word,))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
         else:
@@ -379,7 +372,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from stopwords - {word}')
-        self.mysql_cursor.execute("DELETE FROM stopwords_lalafo WHERE word = %s", (word, ))
+        self.mysql_cursor.execute("DELETE FROM stopwords_lalafo WHERE word = %s", (word,))
         self.mysql_connection.commit()
         logger.debug('The word has been deleted from stopwords')
 
@@ -398,7 +391,7 @@ class DataBaseHandler:
 
         logger.debug(f'Adding to categories - {url}')
         try:
-            self.mysql_cursor.execute(f"INSERT INTO сategories_youla_1 VALUES(%s)", (url, ))
+            self.mysql_cursor.execute(f"INSERT INTO сategories_youla_1 VALUES(%s)", (url,))
         except pymysql.err.IntegrityError:
             logger.error('Failed to add to the database')
 
@@ -410,7 +403,7 @@ class DataBaseHandler:
         self.mysql_connection.ping(reconnect=True)
 
         logger.debug(f'Deleting from categories - {url}')
-        self.mysql_cursor.execute(f"DELETE FROM сategories_youla_1 WHERE url = %s", (url, ))
+        self.mysql_cursor.execute(f"DELETE FROM сategories_youla_1 WHERE url = %s", (url,))
         self.mysql_connection.commit()
         logger.debug('The record was deleted from the database')
 
@@ -422,3 +415,35 @@ class DataBaseHandler:
         resp = self.mysql_cursor.fetchall()
         logger.debug('Categories received')
         return [d for d in resp]
+
+    def add_category_to_watch2(self, url: str):
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug(f'Adding to categories - {url}')
+        try:
+            self.mysql_cursor.execute(f"INSERT INTO watch_cat_2 VALUES(%s)", (url,))
+        except pymysql.err.IntegrityError:
+            logger.error('Failed to add to the database')
+
+        else:
+            self.mysql_connection.commit()
+            logger.debug('The url has been added to categories')
+
+    def remove_category_from_watch2(self, url: str):
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug(f'Deleting from categories - {url}')
+        self.mysql_cursor.execute(f"DELETE FROM watch_cat_2 WHERE url = %s", (url,))
+        self.mysql_connection.commit()
+        logger.debug('The record was deleted from the database')
+
+    def get_categories_from_watch2(self) -> List:
+        self.mysql_connection.ping(reconnect=True)
+
+        logger.debug('Getting categories')
+        self.mysql_cursor.execute(f"SELECT url FROM watch_cat_2")
+        resp = self.mysql_cursor.fetchall()
+        logger.debug('Categories received')
+        return [d for d in resp]
+
+    # =============================
