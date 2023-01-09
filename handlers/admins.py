@@ -9,6 +9,8 @@ from settings import admins_list
 from loader import dp
 from loader import db_handler
 from loguru import logger
+
+from utils import split_list
 import asyncio
 import requests
 
@@ -397,9 +399,12 @@ async def throw_out_stopword(message: types.Message, state: FSMContext):
 @check_access
 async def get_stopwords(message: types.Message):
     words = db_handler.get_stopwords()
-
     try:
-        await message.answer(',\n'.join(words))
+        if words > 20:
+            for l in split_list(words):
+                await message.answer(',\n'.join(l))
+        else:
+            await message.answer(',\n'.join(words))
     except MessageTextIsEmpty:
         await message.answer('Стоп слова отсутствуют')
 
