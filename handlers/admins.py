@@ -400,7 +400,7 @@ async def throw_out_stopword(message: types.Message, state: FSMContext):
 async def get_stopwords(message: types.Message):
     words = db_handler.get_stopwords()
     try:
-        if words > 20:
+        if len(words) > 20:
             for l in split_list(words):
                 await message.answer(',\n'.join(l))
         else:
