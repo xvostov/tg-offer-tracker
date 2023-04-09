@@ -1044,6 +1044,7 @@ async def get_min_prices(message: types.Message):
     except Exception:
         await message.answer('Не удалось получить список минимальных цен')
     else:
+        rows = list(rows)
         if rows:
             for el in rows:
                 to_send = []
