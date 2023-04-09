@@ -466,6 +466,7 @@ class DataBaseHandler:
         mysql_connection, mysql_cursor = self._get_connection_and_cursor()
 
         logger.debug(f'Deleting min price for category {url}')
+
         mysql_cursor.execute(f"DELETE FROM min_prices WHERE url = %s", (url,))
 
         logger.debug('The record was deleted from the database')
