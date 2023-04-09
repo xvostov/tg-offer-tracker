@@ -1046,9 +1046,8 @@ async def get_min_prices(message: types.Message):
     else:
         rows = [list(row) for row in rows]
         if rows:
+            to_send = []
             for row in rows:
-                to_send = []
-
                 to_send.append(f'Минимальная цена: {row[1]}\n{row[0]}')
 
                 await message.answer(',\n'.join(to_send))
