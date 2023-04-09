@@ -996,25 +996,22 @@ async def add_min_price_url_handler(message: types.Message, state: FSMContext):
             await message.answer('Неверный формат адреса, отправьте корректный url')
 
 async def add_min_price_price_handler(message: types.Message, state: FSMContext):
-    while True:
-        try:
-            price = int(message.text)
-        except Exception:
-            await message.answer('Введен некорректный формат минимальной стоимости, введите просто число')
-
-        else:
-            break
-
-    async with state.proxy() as data:
-        url = data.get('url')
-
     try:
-        db_handler.add_min_price_for_category(url, price)
-    except Exception as err:
-        await message.answer('Не удалось добавить запись')
-        logger.error(err)
+        price = int(message.text)
+    except Exception:
+        await message.answer('Введен некорректный формат минимальной стоимости, введите просто число')
 
-    await  state.finish()
+    else:
+        async with state.proxy() as data:
+            url = data.get('url')
+
+        try:
+            db_handler.add_min_price_for_category(url, price)
+        except Exception as err:
+            await message.answer('Не удалось добавить запись')
+            logger.error(err)
+
+        await  state.finish()
 
 @check_access
 async def remove_min_price_for_category(message: types.Message):
@@ -1022,15 +1019,18 @@ async def remove_min_price_for_category(message: types.Message):
     await FSMRemoveMinPrice.get_url.set()
 
 async def remove_min_price_url_handler(message: types.Message, state: FSMContext):
+    if urlparse(message.text.strip()).hostname:
+        try:
+            db_handler.remove_min_price_for_category(message.text.strip())
+        except Exception as err:
+            await message.answer('Не удалось удалить запись')
+            logger.error(err)
 
-    while True:
-        if urlparse(message.text.strip()).hostname:
-            try:
-                db_handler.remove_min_price_for_category(message.text.strip())
-            except Exception as err:
-                await message.answer('Не удалось удалить запись')
-                logger.error(err)
-    await  state.finish()
+        await state.finish()
+
+    else:
+        await message.answer('Неверный формат адреса, отправьте корректный url')
+
 
 async def get_min_prices(message: types.Message):
     try:
