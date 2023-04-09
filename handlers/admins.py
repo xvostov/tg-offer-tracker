@@ -988,6 +988,7 @@ async def add_min_price_url_handler(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             data['url'] = message.text
 
+        await message.answer('Введите минимальную стоимость в формате числа')
         await FSMAddMinPrice.get_min_price.set()
 
     else:
