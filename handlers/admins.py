@@ -9,6 +9,7 @@ from settings import admins_list
 from loader import dp
 from loader import db_handler
 from loguru import logger
+from urllib.parse import urlparse
 
 from utils import split_list
 import asyncio
@@ -124,6 +125,15 @@ class FSMAddCategoryWatch2(StatesGroup):
 
 
 class FSMRemoveCategoryWatch2(StatesGroup):
+    get_url = State()
+
+
+
+class FSMAddMinPrice(StatesGroup):
+    get_url = State()
+    get_min_price = State()
+
+class FSMRemoveMinPrice(StatesGroup):
     get_url = State()
 
 """Обработчики админских команд"""
@@ -967,7 +977,81 @@ async def get_categories_watch2(message: types.Message):
         else:
             await message.answer('Cписок пуст')
 
+@check_access
+async def add_min_price_for_category(message: types.Message):
+    await message.answer('Введите url адрес категории')
+    await FSMAddMinPrice.get_url.set()
 
+
+async def add_min_price_url_handler(message: types.Message, state: FSMContext):
+
+    while True:
+        if urlparse(message.text.strip()).hostname:
+            async with state.proxy() as data:
+                data['url'] = message.text
+
+            await FSMAddMinPrice.get_min_price.set()
+            break
+        else:
+            await message.answer('Неверный формат адреса, отправьте корректный url')
+
+async def add_min_price_price_handler(message: types.Message, state: FSMContext):
+    while True:
+        try:
+            price = int(message.text)
+        except Exception:
+            await message.answer('Введен некорректный формат минимальной стоимости, введите просто число')
+
+        else:
+            break
+
+    async with state.proxy() as data:
+        url = data.get('url')
+
+    try:
+        db_handler.add_min_price_for_category(url, price)
+    except Exception as err:
+        await message.answer('Не удалось добавить запись')
+        logger.error(err)
+
+    await  state.finish()
+
+@check_access
+async def remove_min_price_for_category(message: types.Message):
+    await message.answer('Введите url адрес категории')
+    await FSMRemoveMinPrice.get_url.set()
+
+async def remove_min_price_url_handler(message: types.Message, state: FSMContext):
+
+    while True:
+        if urlparse(message.text.strip()).hostname:
+            try:
+                db_handler.remove_min_price_for_category(message.text.strip())
+            except Exception as err:
+                await message.answer('Не удалось удалить запись')
+                logger.error(err)
+    await  state.finish()
+
+async def get_min_prices(message: types.Message):
+    try:
+        rows = db_handler.get_categories_from_watch2()
+
+    except Exception:
+        await message.answer('Не удалось получить список минимальных цен')
+    else:
+        if rows:
+            for el in rows:
+                to_send = []
+                for i in range(3):
+                    if rows:
+                        row = rows.pop(0)
+                        to_send.append(f'Минимальная цена: {row[1]}\n{row[0]}')
+
+                await message.answer(',\n'.join(to_send))
+                to_send.clear()
+
+        else:
+            await message.answer('Cписок пуст')
 
 def register_admins_handlers(dp: Dispatcher):
     """Регистрация хендлеров этого файла"""
@@ -1055,4 +1139,12 @@ def register_admins_handlers(dp: Dispatcher):
     dp.register_message_handler(add_url_to_categories_watch2, state=FSMAddCategoryWatch2.get_url)
     dp.register_message_handler(remove_category_watch2, commands=['remove_category_watch_2'], state=None)
     dp.register_message_handler(remove_url_from_categories_watch2, state=FSMRemoveCategoryWatch2.get_url)
-    dp.register_message_handler(get_categories_watch2, commands=['get_categories_watch_2'])
+    dp.register_message_handler(get_categories_watch2, commands=['get_categories_watch_2'])\
+
+    dp.register_message_handler(add_min_price_for_category, commands=['add_min_price'], state=None)
+    dp.register_message_handler(add_min_price_url_handler, state=FSMAddMinPrice.get_url)
+    dp.register_message_handler(add_min_price_price_handler, state=FSMAddMinPrice.get_min_price)
+
+    dp.register_message_handler(remove_min_price_for_category, commands=['remove_min_price'], state=None)
+    dp.register_message_handler(remove_min_price_url_handler, state=FSMRemoveMinPrice.get_url)
+    dp.register_message_handler(get_min_prices, commands=['get_min_prices'], state=None)
