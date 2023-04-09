@@ -451,7 +451,7 @@ class DataBaseHandler:
         logger.debug(f'Adding min price ({min_price}) for {url}')
         while True:
             try:
-                mysql_cursor.execute("INSERT INTO min_prices VALUES(%s)", (url, min_price))
+                mysql_cursor.execute("INSERT INTO min_prices(url, min_price) VALUES(%s, %s)", (url, min_price))
                 mysql_connection.commit()
             except pymysql.err.OperationalError:
                 mysql_connection.ping(True)
