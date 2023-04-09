@@ -1033,7 +1033,7 @@ async def remove_min_price_url_handler(message: types.Message, state: FSMContext
 
 async def get_min_prices(message: types.Message):
     try:
-        rows = db_handler.get_categories_from_watch2()
+        rows = db_handler.get_min_prices()
 
     except Exception:
         await message.answer('Не удалось получить список минимальных цен')
@@ -1043,7 +1043,7 @@ async def get_min_prices(message: types.Message):
                 to_send = []
                 for i in range(3):
                     if rows:
-                        row = rows.pop(0)
+                        row = el.pop(0)
                         to_send.append(f'Минимальная цена: {row[1]}\n{row[0]}')
 
                 await message.answer(',\n'.join(to_send))
