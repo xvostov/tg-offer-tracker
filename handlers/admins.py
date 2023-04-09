@@ -984,16 +984,14 @@ async def add_min_price_for_category(message: types.Message):
 
 
 async def add_min_price_url_handler(message: types.Message, state: FSMContext):
+    if urlparse(message.text.strip()).hostname:
+        async with state.proxy() as data:
+            data['url'] = message.text
 
-    while True:
-        if urlparse(message.text.strip()).hostname:
-            async with state.proxy() as data:
-                data['url'] = message.text
+        await FSMAddMinPrice.get_min_price.set()
 
-            await FSMAddMinPrice.get_min_price.set()
-            break
-        else:
-            await message.answer('Неверный формат адреса, отправьте корректный url')
+    else:
+        await message.answer('Неверный формат адреса, отправьте корректный url')
 
 async def add_min_price_price_handler(message: types.Message, state: FSMContext):
     try:
