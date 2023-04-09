@@ -1010,6 +1010,9 @@ async def add_min_price_price_handler(message: types.Message, state: FSMContext)
             await message.answer('Не удалось добавить запись')
             logger.error(err)
 
+        else:
+            await message.answer('Запись успешно сохранена')
+
         await  state.finish()
 
 @check_access
@@ -1024,6 +1027,9 @@ async def remove_min_price_url_handler(message: types.Message, state: FSMContext
         except Exception as err:
             await message.answer('Не удалось удалить запись')
             logger.error(err)
+
+        else:
+            await message.answer('Запись успешно удалена')
 
         await state.finish()
 
