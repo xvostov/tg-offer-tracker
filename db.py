@@ -68,7 +68,7 @@ class DataBaseHandler:
         mysql_cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS min_prices (
         url	VARCHAR(255) NOT NULL UNIQUE,
-        min_price INT
+        min_price INT,
         PRIMARY KEY(url))""")
 
         logger.debug('Initialization of settings')
