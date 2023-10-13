@@ -6,7 +6,7 @@ from settings import admins_list
 from loader import bot, dp, loop, msg_pool, db_handler
 from loguru import logger
 
-from handlers import client, admins
+from handlers import clients, admins
 from aiogram.utils.exceptions import ChatNotFound, ChatIdIsEmpty
 import api
 

@@ -1,2 +1,2 @@
-from . import client
+from . import clients
 from . import admins
