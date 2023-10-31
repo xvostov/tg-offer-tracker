@@ -23,5 +23,5 @@ yarl==1.7.2
 zipp==3.8.0
 cryptography
 requests~=2.27.1
-PyMySQL~=1.0.2
+PyMySQL[rsa]~=1.0.2
 loguru~=0.6.0
