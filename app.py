@@ -2,7 +2,6 @@ import asyncio
 
 from aiogram import executor
 from settings import admins_list
-# from loader import bot, dp, loop, db
 from loader import bot, dp, loop, msg_pool, db_handler
 from loguru import logger
 
@@ -46,6 +45,6 @@ async def msg_handler():
 
 if __name__ == '__main__':
     loop.create_task(msg_handler())
-    client.register_client_handlers(dp)
+    clients.register_client_handlers(dp)
     admins.register_admins_handlers(dp)
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
