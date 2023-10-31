@@ -144,6 +144,4 @@ tests
 docker-compose.yml
 Dockerfile
 .idea
-handlers/__pycache__/admins.cpython-38.pyc
-handlers/__pycache__/client.cpython-38.pyc
-
+__pycache__
